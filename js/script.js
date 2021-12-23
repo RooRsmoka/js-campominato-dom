@@ -12,68 +12,96 @@
 
 // Funzione che restituisce un numero random in base ad un range.
 function RandomNum(minNum, maxNum) {
-    const result =  Math.floor(Math.random() * ((maxNum + 1) - minNum)) + minNum;
-    return result;
-}
-// Funzione che crea una griglia di 100 quadrati e genera
-// all'interno di ogni cella un numero casuale in un range stabilito.
-function levelOne(grid) {
-    for (let i = 1; i <= 100; i++) {
-        const square = document.createElement('div');
-        square.className = 'box box-100';
-        square.innerText = RandomNum(1, 100);
-        grid.append(square);
-        square.addEventListener('click', function() {
-            this.classList.toggle('blue');
-        });
-    }
-}
-// Funzione che crea una griglia di 81 quadrati e genera
-// all'interno di ogni cella un numero casuale in un range stabilito.
-function levelTwo(grid) {
-    for (let i = 1; i <= 81; i++) {
-        const square = document.createElement('div');
-        square.className = 'box box-81';
-        square.innerText = RandomNum(1, 81);
-        grid.append(square);
-        square.addEventListener('click', function() {
-            this.classList.toggle('blue');
-        });
-    }
-}
-// Funzione che crea una griglia di 49 quadrati e genera
-// all'interno di ogni cella un numero casuale in un range stabilito.
-function levelThree(grid) {
-    for (let i = 1; i <= 49; i++) {
-        const square = document.createElement('div');
-        square.className = 'box box-49';
-        square.innerText = RandomNum(1, 49);
-        grid.append(square);
-        square.addEventListener('click', function() {
-            this.classList.toggle('blue');
-        });
-    }
+    return Math.floor(Math.random() * ((maxNum + 1) - minNum)) + minNum;
 }
 
-const gridOutput = document.querySelector('.container-grid');
-let buttonLvl1 = document.querySelector('.btn-lvl1');
-let buttonLvl2 = document.querySelector('.btn-lvl2');
-let buttonLvl3 = document.querySelector('.btn-lvl3');
-// Metto in ascolto il bottone livello 1, cosicchè al click venga richiamata la funzione
-// levelOne() e generi una griglia di 100 quadrati.
+function reset() {
+    gridOutput.innerHTML = '';
+}
+// Funzione che crea 16 numeri casuali e li agiunge ad una lista 
+function createBombs(numOfCells) {
+    // Array contenente i numeri che rappresentano le bombe.
+    let bombList = [];
+    // Aggiungo 16 numeri randomici senza ripetizioni nell'array.
+    while (bombList.length < 16) {
+        const randomBombNumber = RandomNum(1, numOfCells);
+        if (!bombList.includes(randomBombNumber)) { // Se non è incluso o già incluso in bombList(array)  
+            bombList.push(randomBombNumber);       // aggiungi il numero all'array.
+        }
+    }
+    return bombList;
+}
+//
+function startGame(numOfCells, container, createBombsFunction) {
+    
+    let clicked = 0;
+    const bombs = createBombsFunction(numOfCells);
+    for (let i = 1; i <= numOfCells; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'box';
+        cell.innerText = i;
+        container.append(cell);
+
+        cell.addEventListener('click', function() {
+            if (bombs.includes(i)) {
+                cell.classList.add('red');
+                gameOver(false, clicked, container);
+            } else {
+                cell.classList.add('blue');
+                clicked++;
+
+                if (clicked === numOfCells - 16) {
+                    gameOver(true,clicked, container);
+                } 
+            }
+        });
+    }
+}
+//
+function gameOver (isWin, score, container) {
+    const modal = document.createElement('div');
+    modal.className = 'game-over';
+
+    if (isWin) {
+        modal.classList.add('winner');
+        modal.innerText = 'Hai vinto!';
+    } else {
+        modal.classList.add('loser');
+        modal.innerText = 'Hai perso!';
+    }
+
+    modal.innerText += `Il tuo punteggio è: ${score} punti.`;
+
+    const button = document.createElement('button');
+    button.innerText = 'Resetta il gioco.';
+    button.addEventListener('click', reset);
+
+    modal.append(button);
+    container.append(modal);
+}
+//
+
+
+const buttonLvl1 = document.getElementById('btn-lvl1');
+const buttonLvl2 = document.getElementById('btn-lvl2');
+const buttonLvl3 = document.getElementById('btn-lvl3');
+
+const gridOutput = document.getElementById('container-grid');
+
 buttonLvl1.addEventListener('click', function() {
-    gridOutput.innerHTML = '';
-    levelOne(gridOutput);
+    gridOutput.className = 'livello-1';
+    reset();
+    startGame(100, gridOutput, createBombs);
 });
-// Metto in ascolto il bottone livello 2, cosicchè al click venga richiamata la funzione
-// levelTwo() e generi una griglia di 81 quadrati.
+
 buttonLvl2.addEventListener('click', function() {
-    gridOutput.innerHTML = '';
-    levelTwo(gridOutput);
+    gridOutput.className = 'livello-2';
+    reset();
+    startGame(81, gridOutput, createBombs);
 });
-// Metto in ascolto il bottone livello 3, cosicchè al click venga richiamata la funzione
-// levelThree() e generi una griglia di 49 quadrati.
+
 buttonLvl3.addEventListener('click', function() {
-    gridOutput.innerHTML = '';
-    levelThree(gridOutput);
+    gridOutput.className = 'livello-3';
+    reset();
+    startGame(49, gridOutput, createBombs);
 });
